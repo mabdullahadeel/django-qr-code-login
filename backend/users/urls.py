@@ -8,5 +8,4 @@ urlpatterns = [
     path("login/", ObtainAuthToken.as_view(), name="login"),
     path("register/", user_views.UserCreateAPIView.as_view(), name="register"),
     path("me/", user_views.UserMeView.as_view(), name="me"),
-    path("test-notification/", user_views.TestNotificationView.as_view(), name="test-notification"),
 ]
