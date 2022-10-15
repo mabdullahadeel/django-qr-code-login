@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     # internal apps
     'users.apps.UsersConfig',
-    'chat',
 ]
 
 MIDDLEWARE = [
