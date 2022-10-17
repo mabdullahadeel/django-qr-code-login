@@ -15,7 +15,6 @@ import { useAuth } from "../../hooks/useAuth";
 import { NextPageWithLayout } from "../../types/next.types";
 import { useRouter } from "next/router";
 import AuthRoute from "../../components/Authenticated/AuthRoute";
-import { ThemeToggler } from "../../components/ThemeToggler";
 
 const Login: NextPageWithLayout = () => {
   const {
@@ -108,7 +107,11 @@ const Login: NextPageWithLayout = () => {
             Login
           </Button>
         </form>
-        {/* <ThemeToggler showLabel={true} /> */}
+        <Link href="/auth/code-login">
+          <Button width="100%" colorScheme="whatsapp" variant="outline" mt={6}>
+            Try Code Login
+          </Button>
+        </Link>
         <Link href="/auth/register">
           <Button width="100%" colorScheme="gray" variant="outline" mt={6}>
             Register Instead

@@ -3,6 +3,7 @@ import {
   UserLoginPaylod,
   UserRegisterPaylod,
   MeResponse,
+  CodeAuthResponse,
 } from "../types/user.types";
 import axiosInstance from "./axios";
 
@@ -19,5 +20,8 @@ export const authApi = {
   },
   me: () => {
     return axiosInstance.get<MeResponse>("/users/me/");
+  },
+  getWsCode: () => {
+    return axiosInstance.get<CodeAuthResponse>("/users/code_auth/");
   },
 };
