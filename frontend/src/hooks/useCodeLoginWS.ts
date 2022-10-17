@@ -23,9 +23,6 @@ export const useCodeLoginWS = () => {
 
   const connect = async (wsToken: string) => {
     const url = `${socketBasePath}/ws/code_auth/${wsToken}/`;
-    if (socket.current) {
-      disconnect();
-    }
     socket.current = new WebSocket(url);
     socket.current.onclose = () => {
       listeners.current.clear();
