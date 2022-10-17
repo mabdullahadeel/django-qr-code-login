@@ -24,4 +24,9 @@ export const authApi = {
   getWsCode: () => {
     return axiosInstance.get<CodeAuthResponse>("/users/code_auth/");
   },
+  qrLogin: (wsToken: string) => {
+    return axiosInstance.post("/users/code_login/", {
+      ws_token: wsToken,
+    });
+  },
 };

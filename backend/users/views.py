@@ -1,4 +1,6 @@
 import datetime
+from asgiref.sync import async_to_sync
+
 from django.http import HttpRequest
 from django.core.cache import cache
 from rest_framework.views import APIView
@@ -6,8 +8,9 @@ from rest_framework import generics
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from users.models import User
 from rest_framework import status
+from channels.layers import get_channel_layer
+from users.models import User
 from users.serializers import UserPublicSerializer, UserCreateSerializer
 from . import utils
 
@@ -43,9 +46,9 @@ class CodeAuthView(APIView):
         if ws_cookie and cache.has_key(ws_cookie):
             return Response({"ws_token": ws_cookie}, status=status.HTTP_200_OK)
         
-        ws_token = utils.generate_random_string(5)
+        ws_token = utils.generate_random_string(6)
         while (cache.has_key(ws_token)):
-            ws_token = utils.generate_random_string(5)
+            ws_token = utils.generate_random_string(6)
         cache.set(ws_token, '', timeout=TEN_MINUTES_IN_SECONDS)
         response =  Response({"ws_token": ws_token}, status=status.HTTP_200_OK)
         expires_in = datetime.datetime.utcnow() + datetime.timedelta(seconds=TEN_MINUTES_IN_SECONDS)
@@ -54,10 +57,16 @@ class CodeAuthView(APIView):
 
 class CodeAuthLoginView(APIView):
     def post(self, request: HttpRequest) -> Response:
-        ws_token = request.data['token']
+        ws_token = request.data['ws_token']
         token = cache.get(ws_token)
-        if (token):
-            cache.delete(ws_token)
+        channel_name = cache.get(ws_token)
+        if token and channel_name:
             auth_token = Token.objects.get(user=request.user).key
-            return Response({"auth_token": auth_token}, status=status.HTTP_200_OK)
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.send)(channel_name, {
+                "type": "send.token",
+                "token": auth_token
+            })
+            cache.delete(ws_token)
+            return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)

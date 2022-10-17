@@ -3,7 +3,6 @@ import axiosInstance from "../services/axios";
 const TOKEN_KEY = "code-login-token";
 
 export const setSession = (accessToken: string) => {
-  console.log(accessToken);
   if (accessToken) {
     localStorage.setItem(TOKEN_KEY, accessToken);
     axiosInstance.defaults.headers.common[

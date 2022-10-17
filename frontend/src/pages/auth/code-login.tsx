@@ -5,25 +5,30 @@ import {
   Flex,
   Heading,
   useColorModeValue,
-  useToast,
   Spinner,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { NextPageWithLayout } from "../../types/next.types";
-import { useRouter } from "next/router";
 import AuthRoute from "../../components/Authenticated/AuthRoute";
 import { queryKeys } from "../../utils/constants";
 import { authApi } from "../../services/authApi";
+import { useCodeLoginWS } from "../../hooks/useCodeLoginWS";
 
 const CodeLogin: NextPageWithLayout = () => {
-  const toast = useToast();
-  const router = useRouter();
+  const { connect, error } = useCodeLoginWS();
   const { status, data, refetch } = useQuery(
     [queryKeys.GET_WS_KEY],
     authApi.getWsCode,
     {
       select: (data) => data.data,
-      staleTime: 1000 * 60,
+      staleTime: 1000 * 10,
+      onSuccess: async (data) => {
+        try {
+          await connect(data.ws_token);
+        } catch (error) {
+          console.log(error);
+        }
+      },
     }
   );
 
@@ -41,14 +46,15 @@ const CodeLogin: NextPageWithLayout = () => {
         {status === "success" && data && (
           <Heading color="green">{data.ws_token}</Heading>
         )}
-        {status === "error" && (
-          <>
-            <Heading color="red">Error getting code</Heading>
-            <Button colorScheme="red" onClick={() => refetch()}>
-              Retry
-            </Button>
-          </>
-        )}
+        {status === "error" ||
+          (error && (
+            <>
+              <Heading color="red">{error || "Error getting code"}</Heading>
+              <Button colorScheme="red" onClick={() => refetch()}>
+                Retry
+              </Button>
+            </>
+          ))}
         <Link href="/auth/login">
           <Button width="100%" colorScheme="gray" variant="outline" mt={6}>
             Back
