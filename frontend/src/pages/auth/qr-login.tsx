@@ -1,12 +1,10 @@
-import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Button,
   Flex,
   Heading,
   useColorModeValue,
   useToast,
-  Spinner,
   FormErrorMessage,
   FormControl,
   Input,
@@ -14,14 +12,19 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { NextPageWithLayout } from "../../types/next.types";
 import { useRouter } from "next/router";
-import AuthRoute from "../../components/Authenticated/AuthRoute";
-import { queryKeys } from "../../utils/constants";
 import { authApi } from "../../services/authApi";
 import { Authenticated } from "../../components/Authenticated";
 import { useForm } from "react-hook-form";
 
 const QRLogin: NextPageWithLayout = () => {
-  const qrLoginMutation = useMutation(authApi.qrLogin);
+  const router = useRouter();
+  const { code } = router.query;
+  const qrLoginMutation = useMutation(authApi.qrLogin, {
+    retry: 1,
+    onSuccess: () => {
+      router.push(router.pathname);
+    },
+  });
   const {
     handleSubmit,
     register,
@@ -34,7 +37,12 @@ const QRLogin: NextPageWithLayout = () => {
     },
   });
   const toast = useToast();
-  const router = useRouter();
+
+  useEffect(() => {
+    if (code) {
+      qrLoginMutation.mutate(code as string);
+    }
+  }, [code]);
 
   const onSubmit = async () => {
     try {
@@ -86,7 +94,7 @@ const QRLogin: NextPageWithLayout = () => {
             </FormErrorMessage>
           </FormControl>
           <Button
-            isLoading={isSubmitting}
+            isLoading={isSubmitting || qrLoginMutation.isLoading}
             loadingText="Logging in..."
             width="100%"
             colorScheme="purple"

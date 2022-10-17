@@ -10,9 +10,10 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { NextPageWithLayout } from "../../types/next.types";
 import AuthRoute from "../../components/Authenticated/AuthRoute";
-import { queryKeys } from "../../utils/constants";
+import { APP_ORIGIN, queryKeys } from "../../utils/constants";
 import { authApi } from "../../services/authApi";
 import { useCodeLoginWS } from "../../hooks/useCodeLoginWS";
+import QRCode from "react-qr-code";
 
 const CodeLogin: NextPageWithLayout = () => {
   const { connect, error } = useCodeLoginWS();
@@ -44,7 +45,14 @@ const CodeLogin: NextPageWithLayout = () => {
         <Heading mb={6}>Code Login</Heading>
         {status === "loading" && <Spinner />}
         {status === "success" && data && (
-          <Heading color="green">{data.ws_token}</Heading>
+          <>
+            <QRCode
+              value={`${APP_ORIGIN}/quth/qr-login?code=${data.ws_token}`}
+            />
+            <Heading color="purple.300" mt={3}>
+              {data.ws_token}
+            </Heading>
+          </>
         )}
         {status === "error" ||
           (error && (
