@@ -42,6 +42,7 @@ const QRLogin: NextPageWithLayout = () => {
     if (code) {
       qrLoginMutation.mutate(code as string);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   const onSubmit = async () => {
